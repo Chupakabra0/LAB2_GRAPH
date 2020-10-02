@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 
-#include "libs\GL_AL\glew.h"
-#include "libs\GL_AL\glfw3.h"
+#include "include\glew.h"
+#include "include\glfw3.h"
 
 namespace chupakabra {
 	namespace graphics {
@@ -42,8 +42,9 @@ namespace chupakabra {
 			/// <param name="share"> Window's share context </param>
 			explicit Window(const std::pair<size_t, size_t>& size, const std::string& title = "Application",
 				GLFWmonitor* monitor = nullptr, GLFWwindow* share = nullptr)
-				: width(size.first), height(size.second), title(title), monitor(monitor), share(share),
-				window(glfwCreateWindow(size.first, size.second, title.c_str(), monitor, share)) {}
+				: width(size.first), height(size.second), title(title), monitor(monitor), share(share) {
+				this->window = glfwCreateWindow(size.first, size.second, title.c_str(), monitor, share);
+			}
 
 			/// <summary>
 			/// Window's destructor
@@ -186,6 +187,54 @@ namespace chupakabra {
 			auto RefreshMonitor(const std::pair<size_t, size_t>& position,
 				const std::pair<size_t, size_t>& size, const size_t refreshRate) const -> void {
 				glfwSetWindowMonitor(this->window, this->monitor, position.first, position.second, size.first, size.second, refreshRate);
+			}
+		};
+
+		class Initializer {
+		public:
+			static auto InitializeWindow(const double version, const size_t size, const std::string& title = "Application", GLFWmonitor* monitor = nullptr, Window* share = nullptr) -> Window* {
+				return InitializeWindow(version, { size, size }, title, monitor, share);
+			}
+			
+			static auto InitializeWindow(const double version, const std::pair<size_t, size_t>& size = { 100u, 100u }, const std::string& title = "Application", GLFWmonitor* monitor = nullptr, Window* share = nullptr) -> Window* {
+				// Is GLFW initialized
+				if (!glfwInit()) {
+					return nullptr;
+				}
+
+				// Set GLFW version
+				glfwWindowHint(GLFW_VERSION_MAJOR, static_cast<int>(version));
+				glfwWindowHint(GLFW_VERSION_MINOR, static_cast<int>(version * 10) % 10);
+
+				GLFWwindow* shareWindow = nullptr;
+				if (share) {
+					shareWindow = share->GetWindow();
+				}
+				
+				auto* window = new Window(size, title, monitor, shareWindow);
+				
+				if (!window->GetWindow()) {
+					return nullptr;
+				}
+				
+				glfwMakeContextCurrent(window->GetWindow());
+				
+				// Set GLEW experimental
+				glewExperimental = true;
+				
+				// Is GLEW initialized
+				if (glewInit() != GLEW_OK) {
+					return nullptr;
+				}
+
+				return window;
+			}
+		};
+
+		class Deinitializer {
+		public:
+			static auto Deinitialize() -> void {
+				glfwTerminate();
 			}
 		};
 	}
