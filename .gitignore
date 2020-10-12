@@ -329,3 +329,5 @@ ASALocalRun/
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
 *.cache
+Lab2Graph/Lab2Graph.vcxproj
+Lab2Graph/Lab2Graph.vcxproj.filters
