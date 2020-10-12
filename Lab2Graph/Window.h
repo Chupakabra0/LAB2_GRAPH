@@ -49,7 +49,9 @@ namespace chupakabra {
 			/// <summary>
 			/// Window's destructor
 			/// </summary>
-			virtual ~Window() = default;
+			virtual ~Window() {
+				glfwSetWindowShouldClose(this->window, 1);
+			}
 
 			/// <summary>
 			/// Get window's width
@@ -187,54 +189,6 @@ namespace chupakabra {
 			auto RefreshMonitor(const std::pair<size_t, size_t>& position,
 				const std::pair<size_t, size_t>& size, const size_t refreshRate) const -> void {
 				glfwSetWindowMonitor(this->window, this->monitor, position.first, position.second, size.first, size.second, refreshRate);
-			}
-		};
-
-		class Initializer {
-		public:
-			static auto InitializeWindow(const double version, const size_t size, const std::string& title = "Application", GLFWmonitor* monitor = nullptr, Window* share = nullptr) -> Window* {
-				return InitializeWindow(version, { size, size }, title, monitor, share);
-			}
-			
-			static auto InitializeWindow(const double version, const std::pair<size_t, size_t>& size = { 100u, 100u }, const std::string& title = "Application", GLFWmonitor* monitor = nullptr, Window* share = nullptr) -> Window* {
-				// Is GLFW initialized
-				if (!glfwInit()) {
-					return nullptr;
-				}
-
-				// Set GLFW version
-				glfwWindowHint(GLFW_VERSION_MAJOR, static_cast<int>(version));
-				glfwWindowHint(GLFW_VERSION_MINOR, static_cast<int>(version * 10) % 10);
-
-				GLFWwindow* shareWindow = nullptr;
-				if (share) {
-					shareWindow = share->GetWindow();
-				}
-				
-				auto* window = new Window(size, title, monitor, shareWindow);
-				
-				if (!window->GetWindow()) {
-					return nullptr;
-				}
-				
-				glfwMakeContextCurrent(window->GetWindow());
-				
-				// Set GLEW experimental
-				glewExperimental = true;
-				
-				// Is GLEW initialized
-				if (glewInit() != GLEW_OK) {
-					return nullptr;
-				}
-
-				return window;
-			}
-		};
-
-		class Deinitializer {
-		public:
-			static auto Deinitialize() -> void {
-				glfwTerminate();
 			}
 		};
 	}
