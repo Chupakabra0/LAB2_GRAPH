@@ -3,37 +3,19 @@
 
 #include "RenderSystem.h"
 #include "Window.h"
+#include "Helpers.h"
 
 using namespace std;
 
-template <class T>
-auto Println(const T i, ostream& out = cout) -> void {
-	out << i << endl;
-}
-
-auto Hello() -> void {
-	std::cout << "Lab 2" << std::endl << "Author: Alex Safiyulin" << std::endl;
-}
-
-auto MakeTriangle(GLFWwindow* window, chupakabra::render::IRenderSystem* renderer) -> void {
-	glfwMakeContextCurrent(window);
-	renderer->Render(window);
-	glfwSwapBuffers(window);
-}
-
-auto MakeTriangle(chupakabra::graphics::Window& window, chupakabra::render::IRenderSystem* renderer) -> void {
-	MakeTriangle(window.GetWindow(), renderer);
-}
-
 auto main() -> int {
 
-	SetConsoleCP(CP_UTF8);
-	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(1251);
+	SetConsoleOutputCP(1251);
 
 	Hello();
 
-	auto* system = new chupakabra::render::OldRenderSystem();
-	system->Initialize();
+	auto* renderNew = new chupakabra::render::RenderSystem();
+	renderNew->Initialize();
 
 	chupakabra::graphics::Window w1(300u, "W1"), w2(300u, "W2");
 	auto* window = glfwCreateWindow(300, 300, "Window", nullptr, nullptr);
@@ -55,13 +37,14 @@ auto main() -> int {
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	auto colorRgb = 0.f;
-	
+
+	chupakabra::render::Cube::init();
 	while (!glfwWindowShouldClose(window)) {
 		while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && glfwWindowShouldClose(window) == 0) {
 
-			MakeTriangle(w1, system);
-			MakeTriangle(w2, system);
-			MakeTriangle(window, system);
+			MakeVBO(w1, renderNew);
+			MakeVBO(w2, renderNew);
+			MakeVBO(window, renderNew);
 
 			glfwPollEvents();
 			glfwMakeContextCurrent(window);
@@ -70,7 +53,7 @@ auto main() -> int {
 		colorRgb <= 180.f ? colorRgb += 0.005f : colorRgb = 0.f;
 	}
 
-	delete system;
+	delete renderNew;
 	glfwTerminate();
 	
 	return EXIT_SUCCESS;
